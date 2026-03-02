@@ -50,7 +50,8 @@ def send_feishu(msg):
             "text": msg
         }
     }
-    requests.post(WEBHOOK, json=data)
+    r = requests.post(WEBHOOK, json=data)
+    print(r.text)
 
 
 def main():
