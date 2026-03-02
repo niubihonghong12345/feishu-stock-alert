@@ -1,10 +1,15 @@
 import requests
 import datetime
+import time
+import hmac
+import hashlib
+import base64
+import os
 
-# ====== 你的飞书机器人 Webhook ======
-WEBHOOK = "https://open.feishu.cn/open-apis/bot/v2/hook/4e42281e-3d02-48bc-a18c-45e0bbd0f66e"
+# ====== 从 GitHub Secrets 读取 ======
+WEBHOOK = os.environ["FEISHU_WEBHOOK"]
+SECRET = os.environ["FEISHU_SECRET"]
 
-# ====== 监控的 ETF 列表 ======
 ETF_LIST = {
     "159227": "航空航天ETF",
     "159941": "纳指ETF",
@@ -15,7 +20,6 @@ ETF_LIST = {
 
 
 def get_realtime_change(code):
-    # 判断市场
     if code.startswith("5"):
         market = "sh"
     else:
@@ -26,37 +30,42 @@ def get_realtime_change(code):
     try:
         r = requests.get(url, timeout=10)
         text = r.text
-
-        if "=" not in text:
-            return None
-
         data = text.split("=")[1].strip('";\n')
         fields = data.split("~")
-
-        if len(fields) < 33:
-            return None
-
         pct = float(fields[32])
         return pct
-
-    except Exception:
+    except:
         return None
 
 
+def gen_sign(timestamp, secret):
+    string_to_sign = f"{timestamp}\n{secret}"
+    hmac_code = hmac.new(
+        string_to_sign.encode("utf-8"),
+        digestmod=hashlib.sha256
+    ).digest()
+    return base64.b64encode(hmac_code).decode("utf-8")
+
+
 def send_feishu(msg):
+    timestamp = str(int(time.time()))
+    sign = gen_sign(timestamp, SECRET)
+
     data = {
+        "timestamp": timestamp,
+        "sign": sign,
         "msg_type": "text",
         "content": {
             "text": msg
         }
     }
+
     r = requests.post(WEBHOOK, json=data)
     print(r.text)
 
 
 def main():
-    now = datetime.datetime.now()
-    today = now.strftime("%Y-%m-%d")
+    today = datetime.datetime.now().strftime("%Y-%m-%d")
 
     message = f"📊 {today} 14:30 ETF行情播报\n\n"
 
