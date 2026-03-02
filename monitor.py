@@ -2,7 +2,7 @@ import requests
 import datetime
 
 # ====== 你的飞书机器人 Webhook ======
-WEBHOOK = "https://open.feishu.cn/open-apis/bot/v2/hook/dpdtDM5jkBzefb0G6v3JUh"
+WEBHOOK = "https://open.feishu.cn/open-apis/bot/v2/hook/4e42281e-3d02-48bc-a18c-45e0bbd0f66e"
 
 # ====== 监控的 ETF 列表 ======
 ETF_LIST = {
