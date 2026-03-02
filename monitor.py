@@ -38,11 +38,11 @@ def send_feishu(msg):
     requests.post(WEBHOOK, params=params, json=data)
 
 def get_realtime_change(code):
-    df = ak.stock_zh_a_spot_em()
-    row = df[df["代码"] == code]
-    if not row.empty:
-        return float(row.iloc[0]["涨跌幅"])
-    return None
+    df = ak.fund_etf_spot_em()
+    df = df[df["代码"] == code]
+    if df.empty:
+        return None
+    return float(df.iloc[0]["涨跌幅"])
 
 def main():
     message = "📊 14:30 ETF 实时涨跌幅提醒\n\n"
