@@ -29,11 +29,4 @@ jobs:
           FEISHU_WEBHOOK: ${{ secrets.FEISHU_WEBHOOK }}
           FEISHU_SECRET: ${{ secrets.FEISHU_SECRET }}
 
-      # 新增步骤：自动提交和推送更改
-      - name: Auto-commit and push changes
-        uses: stefanzweifel/git-auto-commit-action@v4
-        with:
-          commit_message: 'Auto-update from ETF Monitor'
-          commit_user_name: 'GitHub Actions'
-          commit_user_email: 'actions@github.com'
-          branch: 'main'
+  
