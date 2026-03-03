@@ -7,6 +7,7 @@ import base64
 import os
 
 # ====== 从 GitHub Secrets 读取 ======
+print("SCHEDULE RUNNING")
 WEBHOOK = os.environ["FEISHU_WEBHOOK"]
 SECRET = os.environ["FEISHU_SECRET"]
 
