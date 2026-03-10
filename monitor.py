@@ -75,8 +75,12 @@ def main():
 
     message = f"📊 {today} 14:30 ETF行情播报\n\n"
 
-    for code, name in ETF_LIST.items():
-        pct = get_realtime_change(code)
+    for code, info in ETF_LIST.items():
+
+        name = info["name"]
+        etf_type = info["type"]
+
+        pct = get_realtime_change(code, etf_type)
 
         if pct is None:
             message += f"{name} 获取失败\n"
