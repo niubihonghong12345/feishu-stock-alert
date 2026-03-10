@@ -46,7 +46,13 @@ def get_realtime_change(code):
         data = text.split("=")[1].strip('";')
         fields = data.split("~")
 
-        pct = float(fields[32])
+        # ===== 板块指数 =====
+        if code.startswith("88"):
+            pct = float(fields[3])   # 板块涨跌幅
+
+        # ===== ETF / 股票 =====
+        else:
+            pct = float(fields[32])
 
         return pct
 
