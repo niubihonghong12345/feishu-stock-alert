@@ -11,7 +11,7 @@ print("SCHEDULE RUNNING")
 # ====== Secrets ======
 WEBHOOK = os.environ["FEISHU_WEBHOOK"]
 SECRET = os.environ["FEISHU_SECRET"]
-DEEPSEEK_API_KEY = os.environ.get("DEEPSEEK_API_KEY")
+DEEPSEEK_API_KEY = os.environ["DEEPSEEK_API_KEY"]
 
 # ====== ETF监控列表 ======
 ETF_LIST = {
