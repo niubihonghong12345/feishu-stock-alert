@@ -62,7 +62,7 @@ def ai_analysis(text):
     if not DEEPSEEK_API_KEY:
         return "未配置 AI KEY"
 
-    url = "https://api.deepseek.com/chat/completions"
+    url = "https://dashscope.aliyuncs.com/compatible-mode/v1"
 
     headers = {
         "Authorization": f"Bearer {DEEPSEEK_API_KEY}",
@@ -80,7 +80,7 @@ def ai_analysis(text):
 """
 
     data = {
-        "model": "deepseek-chat",
+        "model": "deepseek-r1-0528",
         "messages": [
             {"role": "user", "content": prompt}
         ]
