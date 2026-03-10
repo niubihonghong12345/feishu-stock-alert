@@ -12,7 +12,8 @@ WEBHOOK = os.environ["FEISHU_WEBHOOK"]
 SECRET = os.environ["FEISHU_SECRET"]
 
 ETF_LIST = {
-    "159227": "航空航天ETF",
+    "159227": "航空航天发展ETF",
+    "886078": "商业航天",
     "159941": "纳指ETF",
     "159801": "芯片ETF",
     "159995": "半导体ETF",
