@@ -12,35 +12,35 @@ WEBHOOK = os.environ["FEISHU_WEBHOOK"]
 SECRET = os.environ["FEISHU_SECRET"]
 
 ETF_LIST = {
-    "886078": {"name": "商业航天", "type": "sector"},
-    "159227": {"name": "航空航天发展ETF", "type": "etf"},
-    "159941": {"name": "纳指ETF", "type": "etf"},
-    "159801": {"name": "芯片ETF", "type": "etf"},
-    "159995": {"name": "半导体ETF", "type": "etf"},
-    "518880": {"name": "黄金ETF", "type": "etf"}
+    "886078": "商业航天",
+    "159227": "航空航天发展ETF",
+    "159941": "纳指ETF",
+    "159801": "芯片ETF",
+    "159995": "半导体ETF",
+    "518880": "黄金ETF"
 }
 
 
-def get_realtime_change(code, type):
+def get_realtime_change(code):
 
-    if type == "sector":
-        url = f"https://qt.gtimg.cn/q={code}"
-    else:
-        if code.startswith("5"):
-            market = "sh"
-        else:
-            market = "sz"
+    url = f"https://d.10jqka.com.cn/v6/realhead/{code}.json"
 
-        url = f"https://qt.gtimg.cn/q={market}{code}"
+    headers = {
+        "User-Agent": "Mozilla/5.0"
+    }
 
     try:
-        r = requests.get(url, timeout=10)
-        text = r.text
-        data = text.split("=")[1].strip('";\n')
-        fields = data.split("~")
-        pct = float(fields[32])
+        r = requests.get(url, headers=headers, timeout=10)
+
+        data = r.json()
+
+        # 同花顺字段
+        pct = float(data["items"]["chg"])   # 涨跌幅
+
         return pct
-    except:
+
+    except Exception as e:
+        print("获取失败:", code, e)
         return None
 
 
@@ -71,16 +71,14 @@ def send_feishu(msg):
 
 
 def main():
+
     today = datetime.datetime.now().strftime("%Y-%m-%d")
 
     message = f"📊 {today} 14:30 ETF行情播报\n\n"
 
-    for code, info in ETF_LIST.items():
+    for code, name in ETF_LIST.items():
 
-        name = info["name"]
-        etf_type = info["type"]
-
-        pct = get_realtime_change(code, etf_type)
+        pct = get_realtime_change(code)
 
         if pct is None:
             message += f"{name} 获取失败\n"
