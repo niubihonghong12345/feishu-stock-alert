@@ -62,7 +62,7 @@ def ai_analysis(text):
     if not DEEPSEEK_API_KEY:
         return "未配置 AI KEY"
 
-    url = "https://dashscope.aliyuncs.com/compatible-mode/v1"
+    url = "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions"
 
     headers = {
         "Authorization": f"Bearer {DEEPSEEK_API_KEY}",
