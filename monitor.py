@@ -80,7 +80,7 @@ def ai_analysis(text):
 """
 
     data = {
-        "model": "deepseek-r1-0528",
+        "model": "deepseek-r1",
         "messages": [
             {"role": "user", "content": prompt}
         ]
@@ -90,9 +90,13 @@ def ai_analysis(text):
 
         r = requests.post(url, headers=headers, json=data)
 
-        return r.json()["choices"][0]["message"]["content"]
+        res = r.json()
 
-    except:
+        return res["choices"][0]["message"]["content"]
+
+    except Exception as e:
+
+        print("AI分析失败:", e)
 
         return "AI分析失败"
 
