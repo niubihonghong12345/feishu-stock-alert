@@ -8,11 +8,12 @@ import os
 
 print("SCHEDULE RUNNING")
 
-# ====== 从 GitHub Secrets 读取 ======
+# ====== Secrets ======
 WEBHOOK = os.environ["FEISHU_WEBHOOK"]
 SECRET = os.environ["FEISHU_SECRET"]
+DEEPSEEK_API_KEY = os.environ.get("DEEPSEEK_API_KEY")
 
-# ====== 监控列表 ======
+# ====== ETF监控列表 ======
 ETF_LIST = {
     "886078": "商业航天",
     "159227": "航空航天发展ETF",
@@ -30,15 +31,10 @@ def get_realtime_change(code):
         "User-Agent": "Mozilla/5.0"
     }
 
-    # 板块指数
     if code.startswith("88"):
         url = f"https://qt.gtimg.cn/q={code}"
-
-    # 沪市ETF
     elif code.startswith("5"):
         url = f"https://qt.gtimg.cn/q=sh{code}"
-
-    # 深市ETF
     else:
         url = f"https://qt.gtimg.cn/q=sz{code}"
 
@@ -47,9 +43,7 @@ def get_realtime_change(code):
         r = requests.get(url, headers=headers, timeout=10)
 
         text = r.text
-
         data = text.split("=")[1].strip('";')
-
         fields = data.split("~")
 
         pct = float(fields[32])
@@ -59,8 +53,48 @@ def get_realtime_change(code):
     except Exception as e:
 
         print("获取失败:", code, e)
-
         return None
+
+
+# ====== DeepSeek AI分析 ======
+def ai_analysis(text):
+
+    if not DEEPSEEK_API_KEY:
+        return "未配置 AI KEY"
+
+    url = "https://api.deepseek.com/chat/completions"
+
+    headers = {
+        "Authorization": f"Bearer {DEEPSEEK_API_KEY}",
+        "Content-Type": "application/json"
+    }
+
+    prompt = f"""
+根据以下ETF行情写一句简短市场分析：
+
+{text}
+
+要求：
+1 不超过40字
+2 像金融分析师点评
+"""
+
+    data = {
+        "model": "deepseek-chat",
+        "messages": [
+            {"role": "user", "content": prompt}
+        ]
+    }
+
+    try:
+
+        r = requests.post(url, headers=headers, json=data)
+
+        return r.json()["choices"][0]["message"]["content"]
+
+    except:
+
+        return "AI分析失败"
 
 
 # ====== 飞书签名 ======
@@ -76,7 +110,7 @@ def gen_sign(timestamp, secret):
     return base64.b64encode(hmac_code).decode("utf-8")
 
 
-# ====== 发送飞书 ======
+# ====== 飞书推送 ======
 def send_feishu(msg):
 
     timestamp = str(int(time.time()))
@@ -102,24 +136,52 @@ def main():
 
     today = datetime.datetime.now().strftime("%Y-%m-%d")
 
-    message = f"📊 {today} 14:30 ETF行情播报\n\n"
+    result = []
 
     for code, name in ETF_LIST.items():
 
         pct = get_realtime_change(code)
 
         if pct is None:
-            message += f"{name} 获取失败\n"
             continue
 
+        result.append((name, pct))
+
+    # ===== 排序（跌幅排行）=====
+    result.sort(key=lambda x: x[1])
+
+    message = f"📊 {today} 14:30 ETF行情播报\n\n"
+
+    alert_list = []
+
+    for name, pct in result:
+
         if pct > 0:
-            direction = "📈 上涨"
+            direction = "📈"
         elif pct < 0:
-            direction = "📉 下跌"
+            direction = "📉"
         else:
-            direction = "⏸ 平盘"
+            direction = "⏸"
 
         message += f"{name} {direction} {pct:.2f}%\n"
+
+        if pct <= -3:
+            alert_list.append((name, pct))
+
+    # ===== 跌幅报警 =====
+    if alert_list:
+
+        message += "\n⚠️ 跌幅超过3%\n"
+
+        for name, pct in alert_list:
+
+            message += f"{name} {pct:.2f}%\n"
+
+    # ===== AI分析 =====
+    ai_text = ai_analysis(message)
+
+    message += "\n🤖 AI行情分析\n"
+    message += ai_text
 
     send_feishu(message)
 
