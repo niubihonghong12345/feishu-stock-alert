@@ -12,22 +12,26 @@ WEBHOOK = os.environ["FEISHU_WEBHOOK"]
 SECRET = os.environ["FEISHU_SECRET"]
 
 ETF_LIST = {
-    "159227": "航空航天发展ETF",
-    "886078": "商业航天",
-    "159941": "纳指ETF",
-    "159801": "芯片ETF",
-    "159995": "半导体ETF",
-    "518880": "黄金ETF"
+    "886078": {"name": "商业航天", "type": "sector"},
+    "159227": {"name": "航空航天发展ETF", "type": "etf"},
+    "159941": {"name": "纳指ETF", "type": "etf"},
+    "159801": {"name": "芯片ETF", "type": "etf"},
+    "159995": {"name": "半导体ETF", "type": "etf"},
+    "518880": {"name": "黄金ETF", "type": "etf"}
 }
 
 
-def get_realtime_change(code):
-    if code.startswith("5"):
-        market = "sh"
-    else:
-        market = "sz"
+def get_realtime_change(code, type):
 
-    url = f"https://qt.gtimg.cn/q={market}{code}"
+    if type == "sector":
+        url = f"https://qt.gtimg.cn/q={code}"
+    else:
+        if code.startswith("5"):
+            market = "sh"
+        else:
+            market = "sz"
+
+        url = f"https://qt.gtimg.cn/q={market}{code}"
 
     try:
         r = requests.get(url, timeout=10)
