@@ -2,7 +2,7 @@ name: ETF Monitor
 
 on:
   schedule:
-     - cron: '00 6 * * 1-5'  # 北京时间14:00（UTC 06:00），周一到周五
+     - cron: '17 5 * * 1-5'  # 北京时间14:00（UTC 06:00），周一到周五
   workflow_dispatch:
 
 jobs:
